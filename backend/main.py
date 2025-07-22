@@ -1,6 +1,5 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import openai
 from wordcloud import WordCloud
 import imageio.v2 as imageio
 from io import BytesIO
