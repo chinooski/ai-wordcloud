@@ -1,47 +1,60 @@
 # AI Word Cloud
 
-This project hosts a simple frontend for generating word clouds using a backend service.
+This project provides a simple FastAPI backend and React frontend for generating word cloud images using text from Google's Gemini API. The app is served from a single FastAPI server for easier development and deployment.
 
-## Frontend
+## Running the App (Single Server Setup)
 
-The React client lives in `frontend/` and was created with Vite.
+### 1. Build the Frontend
 
-Run it locally:
+Navigate to the `frontend` directory and build the production-ready frontend:
 
 ```bash
 cd frontend
-npm install
-npm run dev
+npm install  # if you haven't already
+npm run build
 ```
-=======
-# ai-wordcloud
 
-This project provides a simple FastAPI backend for generating word cloud images
-using text from OpenAI completions.
+This will create a `dist` directory containing the static files.
 
-## Running the API locally
+### 2. Set Up the Python Backend Environment
 
-1. Create a virtual environment and install dependencies:
+Navigate to the `backend` directory and create a virtual environment:
 
 ```bash
+cd ../backend
 python3 -m venv .venv
 source .venv/bin/activate
+```
+- On Windows, use: `./.venv/Scripts/activate`
+
+Install the required dependencies:
+
+```bash
 pip install -r requirements.txt
 ```
 
-2. Export your OpenAI API key so the backend can authenticate with the
-   OpenAI service:
+### 3. Start the Backend (Serves Both Frontend & API)
+
+Run the FastAPI server:
 
 ```bash
-export OPENAI_API_KEY=YOUR_KEY
+uvicorn main:app --reload
 ```
 
-3. Start the application with Uvicorn:
+- Visit `http://127.0.0.1:8000` in your browser to see the app.
+- All API requests and static frontend files are served from the same server.
 
-```bash
-uvicorn backend.main:app --reload
-```
+### Notes
+- You no longer need to configure CORS for local development, since both frontend and backend are served from the same origin.
+- If you make changes to the frontend, re-run `npm run build` to update the static files.
 
-The API will be available at `http://127.0.0.1:8000`. You can send a POST request
-to `/generate` with a JSON body containing a `prompt` field to receive a
-base64-encoded PNG image of the generated word cloud.
+---
+
+## (Legacy) Enabling CORS for Separate Frontend/Backend
+
+<details>
+<summary>Show CORS Setup</summary>
+
+If you ever need to run the frontend and backend separately (e.g., for development), enable CORS in your FastAPI backend.
+
+</details>

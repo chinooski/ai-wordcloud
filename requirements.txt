@@ -1,5 +1,7 @@
 fastapi
 uvicorn
-openai
 wordcloud
 imageio
+google-generativeai
+Pillow
+starlette
