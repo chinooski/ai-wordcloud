@@ -17,35 +17,46 @@ A simple, powerful web application for generating beautiful, customized word clo
 
 ## How to Run
 
-### 1. Set Up the Environment
-
-Clone the repository, navigate into the project directory, and install all dependencies for both the frontend and backend.
-
+### 1. Install Frontend Dependencies
+From the project root, navigate to the `frontend` directory to install dependencies and build the production files.
 ```bash
-# From the project root
-# Install frontend dependencies
 cd frontend
 npm install
 npm run build
+```
 
-# Install backend dependencies
+### 2. Set Up Backend Environment
+Navigate back to the project root and then into the `backend` directory.
+
+**Create the virtual environment:**
+```bash
 cd ../backend
 python3 -m venv .venv
-source .venv/bin/activate
-# On Windows, use: .\.venv\Scripts\activate
+```
+
+**Activate the virtual environment:**
+-   On **macOS / Linux**:
+    ```bash
+    source .venv/bin/activate
+    ```
+-   On **Windows**:
+    ```bash
+    .\.venv\Scripts\activate
+    ```
+
+**Install Python packages:**
+*(Ensure your virtual environment is active before running)*
+```bash
 pip install -r ../requirements.txt
 ```
 
-### 2. Start the Server
-
+### 3. Start the Server
 From the `backend` directory (with your virtual environment activated), start the FastAPI server:
-
 ```bash
 uvicorn main:app --reload
 ```
 
-### 3. Use the App
-
+### 4. Use the App
 -   Navigate to `http://127.0.0.1:8000` in your browser.
 -   You will be prompted to enter your Google AI Studio API key. This is required once per server session.
 -   Enter your source text and instructions, and click "Generate New Text."
