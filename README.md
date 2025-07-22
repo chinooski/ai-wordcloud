@@ -1,60 +1,53 @@
 # AI Word Cloud
 
-This project provides a simple FastAPI backend and React frontend for generating word cloud images using text from Google's Gemini API. The app is served from a single FastAPI server for easier development and deployment.
+A simple, powerful web application for generating beautiful, customized word clouds from any text using Google's Gemini API.
 
-## Running the App (Single Server Setup)
+![AI Word Cloud Screenshot](./images/Screenshot.png)
 
-### 1. Build the Frontend
+## Features
 
-Navigate to the `frontend` directory and build the production-ready frontend:
+-   **AI-Powered Text Analysis:** Uses Google's Gemini to extract keywords based on your instructions (e.g., "all nouns," "adjectives describing the protagonist").
+-   **Instant Customization:** After generating the text, you can instantly customize the appearance of the word cloud without new API calls.
+-   **Customizable Appearance:**
+    -   **Shapes:** Render as a classic rectangle or a modern sphere.
+    -   **Color Palettes:** Choose from multiple themes like Ocean, Sunset, and Monochrome.
+    -   **Word Exclusion:** Easily filter out common or unwanted words.
+-   **Downloadable Images:** Save your final creation as a high-quality PNG.
+-   **Single Server:** Both the React frontend and FastAPI backend are run from a single process for simple setup.
+
+## How to Run
+
+### 1. Set Up the Environment
+
+Clone the repository, navigate into the project directory, and install all dependencies for both the frontend and backend.
 
 ```bash
+# From the project root
+# Install frontend dependencies
 cd frontend
-npm install  # if you haven't already
+npm install
 npm run build
-```
 
-This will create a `dist` directory containing the static files.
-
-### 2. Set Up the Python Backend Environment
-
-Navigate to the `backend` directory and create a virtual environment:
-
-```bash
+# Install backend dependencies
 cd ../backend
 python3 -m venv .venv
 source .venv/bin/activate
-```
-- On Windows, use: `./.venv/Scripts/activate`
-
-Install the required dependencies:
-
-```bash
-pip install -r requirements.txt
+# On Windows, use: .\.venv\Scripts\activate
+pip install -r ../requirements.txt
 ```
 
-### 3. Start the Backend (Serves Both Frontend & API)
+### 2. Start the Server
 
-Run the FastAPI server:
+From the `backend` directory (with your virtual environment activated), start the FastAPI server:
 
 ```bash
 uvicorn main:app --reload
 ```
 
-- Visit `http://127.0.0.1:8000` in your browser to see the app.
-- All API requests and static frontend files are served from the same server.
+### 3. Use the App
 
-### Notes
-- You no longer need to configure CORS for local development, since both frontend and backend are served from the same origin.
-- If you make changes to the frontend, re-run `npm run build` to update the static files.
-
----
-
-## (Legacy) Enabling CORS for Separate Frontend/Backend
-
-<details>
-<summary>Show CORS Setup</summary>
-
-If you ever need to run the frontend and backend separately (e.g., for development), enable CORS in your FastAPI backend.
-
-</details>
+-   Navigate to `http://127.0.0.1:8000` in your browser.
+-   You will be prompted to enter your Google AI Studio API key. This is required once per server session.
+-   Enter your source text and instructions, and click "Generate New Text."
+-   Use the customization panel to adjust the appearance instantly.
+-   Download your finished word cloud!

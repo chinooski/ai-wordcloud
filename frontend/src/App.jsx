@@ -4,6 +4,7 @@ import './App.css'
 function App() {
   const [text, setText] = useState('')
   const [instructions, setInstructions] = useState('')
+  const [density, setDensity] = useState('default'); // New state for density
   const [excludeWords, setExcludeWords] = useState('') // New state
   const [debouncedExcludeWords, setDebouncedExcludeWords] = useState(''); // Debounced state
   const [shape, setShape] = useState('rectangle') // New state for shape
@@ -79,7 +80,10 @@ function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ api_key: apiKey }),
       });
-      if (!res.ok) throw new Error('Failed to set API key');
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || 'Failed to set API key');
+      }
       setApiKeyIsSet(true);
       alert('API Key set successfully!');
     } catch (err) {
@@ -91,16 +95,25 @@ function App() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setImageData(null)
+    e.preventDefault();
+    setLoading(true);
+    setImageData(null);
     try {
-      const prompt = `Extract ${instructions} from the following text and return a comma-separated list of words.\n\nText:\n${text}`
+      let densityInstruction = '';
+      if (density === 'concise') {
+        densityInstruction = '0-15 words';
+      } else if (density === 'verbose') {
+        densityInstruction = '40-75 words';
+      } else {
+        densityInstruction = '15-40 words';
+      }
+
+      const prompt = `Your primary task is to extract ${instructions} from the following text. You must return a comma-separated list containing approximately ${densityInstruction}. It is very important that you generate a list within this range. For multi-word concepts, join them with a hyphen. The final output should only be the comma-separated list and nothing else.\n\nText:\n${text}`;
       const res = await fetch('/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt })
-      })
+        body: JSON.stringify({ prompt, density }),
+      });
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.detail || 'Request failed');
@@ -138,6 +151,12 @@ function App() {
 
   return (
     <div className="app">
+      {loading && (
+        <div className="loading-overlay">
+          <div className="spinner"></div>
+          <p>Generating text from AI... <br/> This may take a moment.</p>
+        </div>
+      )}
       <h1>AI Word Cloud</h1>
 
       {/* --- Section 1: Generate Content --- */}
@@ -154,6 +173,11 @@ function App() {
           value={instructions}
           onChange={(e) => setInstructions(e.target.value)}
         />
+        <select value={density} onChange={(e) => setDensity(e.target.value)}>
+          <option value="concise">Concise (0-15 words)</option>
+          <option value="default">Default (15-40 words)</option>
+          <option value="verbose">Verbose (40-75 words)</option>
+        </select>
         <button type="submit" disabled={loading || isRendering}>
           {loading ? 'Generating Text...' : 'Generate New Text'}
         </button>
