@@ -58,7 +58,7 @@ uvicorn main:app --reload
 
 ### 4. Use the App
 -   Navigate to `http://127.0.0.1:8000` in your browser.
--   You will be prompted to enter your Google AI Studio API key. This is required once per server session.
+-   Enter your Google AI Studio (Gemini) API key in the designated input field. The key is sent with each request and is not stored on the server.
 -   Enter your source text and instructions, and click "Generate New Text."
 -   Use the customization panel to adjust the appearance instantly.
 -   Download your finished word cloud!

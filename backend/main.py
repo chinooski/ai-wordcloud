@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header
 from pydantic import BaseModel
 from wordcloud import WordCloud
 import imageio.v2 as imageio
@@ -15,29 +15,6 @@ import re
 
 app = FastAPI()
 
-# --- API Key Management ---
-# The client will be configured by the /set-key endpoint
-genai.configure(api_key="dummy") # Dummy key, will be replaced by user input
-
-class ApiKey(BaseModel):
-    api_key: str
-
-@app.post("/set-key")
-async def set_api_key(key: ApiKey):
-    """Receives and sets the Gemini API key for the server session."""
-    try:
-        genai.configure(api_key=key.api_key)
-        # Test the key to ensure it's valid
-        genai.get_model('models/gemini-1.5-flash')
-        return {"message": "API key set successfully"}
-    except google_exceptions.PermissionDenied:
-        raise HTTPException(status_code=401, detail="Invalid Gemini API key.")
-    except google_exceptions.ResourceExhausted:
-        raise HTTPException(status_code=429, detail="You have exceeded your Gemini quota. Please check your plan and billing details.")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
-# -------------------------
-
 # --- Models ---
 class Prompt(BaseModel):
     prompt: str
@@ -47,9 +24,14 @@ class Prompt(BaseModel):
     color_palette: str | None = "viridis"
 
 @app.post("/generate")
-async def generate(prompt: Prompt):
+async def generate(prompt: Prompt, x_gemini_api_key: str | None = Header(None)):
     """Generate a word cloud image from a Gemini completion."""
+    if not x_gemini_api_key:
+        raise HTTPException(status_code=401, detail="Missing X-Gemini-API-Key header.")
+    
     try:
+        genai.configure(api_key=x_gemini_api_key)
+        # Test the key to ensure it's valid
         model = genai.GenerativeModel('gemini-1.5-flash')
         response = model.generate_content(prompt.prompt)
         text = response.text

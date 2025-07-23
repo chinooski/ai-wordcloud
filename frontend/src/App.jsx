@@ -10,7 +10,6 @@ function App() {
   const [shape, setShape] = useState('rectangle') // New state for shape
   const [colorPalette, setColorPalette] = useState('viridis') // New state for color
   const [apiKey, setApiKey] = useState('')
-  const [apiKeyIsSet, setApiKeyIsSet] = useState(false) // New state
   const [imageData, setImageData] = useState(null)
   const [generatedText, setGeneratedText] = useState(''); // Cache for the API response
   const [loading, setLoading] = useState(false)
@@ -71,31 +70,14 @@ function App() {
     document.body.removeChild(link);
   };
 
-  const handleApiKeySubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const res = await fetch('/set-key', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ api_key: apiKey }),
-      });
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.detail || 'Failed to set API key');
-      }
-      setApiKeyIsSet(true);
-      alert('API Key set successfully!');
-    } catch (err) {
-      console.error(err);
-      alert(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!apiKey) {
+      alert('Please enter your Gemini API key.');
+      return;
+    }
+
     setLoading(true);
     setImageData(null);
     try {
@@ -111,7 +93,10 @@ function App() {
       const prompt = `Your primary task is to extract ${instructions} from the following text. You must return a comma-separated list containing approximately ${densityInstruction}. It is very important that you generate a list within this range. For multi-word concepts, join them with a hyphen. The final output should only be the comma-separated list and nothing else.\n\nText:\n${text}`;
       const res = await fetch('/generate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Gemini-API-Key': apiKey,
+        },
         body: JSON.stringify({ prompt, density }),
       });
       if (!res.ok) {
@@ -128,27 +113,6 @@ function App() {
     }
   }
 
-  if (!apiKeyIsSet) {
-    return (
-      <div className="app">
-        <h1>Set Gemini API Key</h1>
-        <p>Please provide your API key to begin.</p>
-        <form onSubmit={handleApiKeySubmit} className="api-key-form">
-          <input
-            type="password"
-            placeholder="Enter your Gemini API key"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            className="api-key-input"
-          />
-          <button type="submit" disabled={loading}>
-            {loading ? 'Setting Key...' : 'Set API Key'}
-          </button>
-        </form>
-      </div>
-    );
-  }
-
   return (
     <div className="app">
       {loading && (
@@ -160,6 +124,15 @@ function App() {
       <h1>AI Word Cloud</h1>
 
       {/* --- Section 1: Generate Content --- */}
+      <div className="api-key-section">
+        <input
+          type="password"
+          placeholder="Enter your Gemini API key"
+          value={apiKey}
+          onChange={(e) => setApiKey(e.target.value)}
+          className="api-key-input"
+        />
+      </div>
       <form onSubmit={handleSubmit} className="generate-form">
         <textarea
           rows="6"
