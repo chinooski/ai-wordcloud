@@ -15,13 +15,16 @@ This is a full-stack AI-powered word cloud generator consisting of:
 **Backend (`backend/main.py`)**:
 - `/generate` endpoint: Uses Google Gemini API to extract keywords from text based on user instructions
 - `/render-image` endpoint: Generates word cloud images using the `wordcloud` library with customizable shapes, colors, and word exclusions
+- `/upload-file` endpoint: Handles file uploads (txt, csv, tsv, md, log) with automatic text extraction and validation
 - Static file serving: Mounts the built React app at root path
 
 **Frontend (`frontend/src/App.jsx`)**:
-- Single-page React application with two main sections:
-  1. Text generation form (requires Gemini API key)
-  2. Real-time appearance customization (shape, colors, word exclusions)
+- Single-page React application with three main sections:
+  1. File upload area with drag-and-drop support for direct text input
+  2. Text generation form (requires Gemini API key)
+  3. Real-time appearance customization (shape, colors, word exclusions)
 - Uses debounced re-rendering for instant visual feedback on customization changes
+- Supports file uploads up to 10MB with automatic text extraction from CSV files
 
 ## Development Commands
 
@@ -37,7 +40,9 @@ npm run lint         # Run ESLint
 ### Backend Development
 ```bash
 uv sync                                    # Install dependencies (auto-creates .venv)
-uv run uvicorn backend.main:app --reload  # Start development server
+uv run python start_server.py             # Start development server (recommended)
+# Alternative:
+uv run uvicorn backend.main:app --reload  # Direct uvicorn start
 ```
 
 **Note:** We use native `uv` commands with `pyproject.toml` for modern Python development. Install uv first: `curl -LsSf https://astral.sh/uv/install.sh | sh`
@@ -57,13 +62,23 @@ uv remove package-name     # Remove dependency
 
 ## Key Dependencies
 
-- **Backend**: FastAPI, uvicorn, wordcloud, google-generativeai, Pillow, numpy
+- **Backend**: FastAPI, uvicorn, wordcloud, google-generativeai, Pillow, numpy, python-multipart, chardet
 - **Package Management**: Modern `pyproject.toml` + `uv.lock` for reproducible builds
 - **Frontend**: React 19, Vite, ESLint
 
 ## API Integration
 
 The app requires a Google AI Studio (Gemini) API key provided by users at runtime. The key is passed via `X-Gemini-API-Key` header and is not stored server-side.
+
+## File Upload Features
+
+The application now supports file uploads for easier text input:
+
+- **Supported formats**: .txt, .csv, .tsv, .md, .log files
+- **File size limit**: 10MB maximum
+- **CSV/TSV processing**: Automatically extracts meaningful text content from tabular data
+- **Drag-and-drop**: Users can drag files directly onto the upload area
+- **Auto-population**: Uploaded text automatically fills the text input area
 
 ## Troubleshooting
 
