@@ -43,61 +43,64 @@ npm run build
     ```
 
 ### 3. Set Up Backend Environment
-Navigate back to the project root and then into the `backend` directory.
+Navigate back to the project root.
 
-**Create the virtual environment:**
+**Install dependencies using uv:**
 ```bash
-cd ../backend
-python3 -m venv .venv
-```
-
-**Activate the virtual environment:**
--   On **macOS / Linux**:
-    ```bash
-    source .venv/bin/activate
-    ```
--   On **Windows**:
-    ```bash
-    .\.venv\Scripts\activate
-    ```
-
-**Install Python packages:**
-*(Ensure your virtual environment is active before running)*
-```bash
-uv pip install -r ../requirements.txt
+uv sync
 ```
 
 > **⚡ Performance Note:** uv is 10-100x faster than pip! Installation typically completes in under 1 second.
 
+**Alternative: Manual setup** (if you want to understand the process):
+```bash
+# uv automatically creates and manages the virtual environment
+uv venv  # Creates .venv automatically
+uv pip install -e .  # Installs dependencies from pyproject.toml
+```
+
 <details>
 <summary>🔄 <strong>Migrating from pip?</strong> Click here for migration guide</summary>
 
+**We now use `pyproject.toml` instead of `requirements.txt` for modern Python packaging:**
+
+- ✅ **Faster dependency resolution**
+- ✅ **Lockfile support** (`uv.lock`) for reproducible builds  
+- ✅ **Automatic virtual environment management**
+- ✅ **Modern Python packaging standards**
+
 **If you were previously using pip:**
 
-1. **Remove old virtual environment** (optional but recommended):
+1. **Remove old virtual environment** (optional):
    ```bash
-   rm -rf .venv  # On macOS/Linux
-   rmdir /s .venv  # On Windows
+   rm -rf backend/.venv  # Remove old venv if it exists
    ```
 
-2. **Create fresh environment and install with uv:**
+2. **Use uv sync for instant setup:**
    ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate  # macOS/Linux
-   # OR
-   .\.venv\Scripts\activate  # Windows
-   uv pip install -r ../requirements.txt
+   uv sync  # Creates .venv and installs all dependencies
    ```
 
-**Fallback to pip** (if needed):
+**Legacy fallback** (still supported):
 ```bash
-pip install -r ../requirements.txt  # Still works as backup
+# Create manual venv and use pip (slower)
+cd backend
+python3 -m venv .venv
+source .venv/bin/activate  # macOS/Linux
+uv pip install -r ../requirements.txt
 ```
 </details>
 
 ### 4. Start the Server
-From the `backend` directory (with your virtual environment activated), start the FastAPI server:
+From the project root, start the FastAPI server using uv:
 ```bash
+uv run uvicorn backend.main:app --reload
+```
+
+**Alternative:** Traditional method (slower setup):
+```bash
+cd backend
+source .venv/bin/activate  # Activate venv manually
 uvicorn main:app --reload
 ```
 

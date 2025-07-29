@@ -36,23 +36,29 @@ npm run lint         # Run ESLint
 
 ### Backend Development
 ```bash
-cd backend
-python3 -m venv .venv
-source .venv/bin/activate  # On Windows: .\.venv\Scripts\activate
-uv pip install -r ../requirements.txt  # Fast Python package manager (10-100x faster than pip)
-uvicorn main:app --reload  # Start development server
+uv sync                                    # Install dependencies (auto-creates .venv)
+uv run uvicorn backend.main:app --reload  # Start development server
 ```
 
-**Note:** We use `uv` instead of `pip` for much faster dependency installation. Install uv first: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+**Note:** We use native `uv` commands with `pyproject.toml` for modern Python development. Install uv first: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+
+**Adding new dependencies:**
+```bash
+uv add package-name        # Add to pyproject.toml and install
+uv add --dev pytest        # Add development dependency
+uv remove package-name     # Remove dependency
+```
 
 ### Production Deployment
 1. Build frontend: `cd frontend && npm run build`
-2. Start backend: `cd backend && uvicorn main:app`
-3. Access at `http://127.0.0.1:8000`
+2. Install dependencies: `uv sync --frozen`  # Uses uv.lock for exact reproducible install
+3. Start backend: `uv run uvicorn backend.main:app`
+4. Access at `http://127.0.0.1:8000`
 
 ## Key Dependencies
 
 - **Backend**: FastAPI, uvicorn, wordcloud, google-generativeai, Pillow, numpy
+- **Package Management**: Modern `pyproject.toml` + `uv.lock` for reproducible builds
 - **Frontend**: React 19, Vite, ESLint
 
 ## API Integration
