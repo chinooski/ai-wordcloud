@@ -105,12 +105,3 @@ uv sync --frozen
 pip install uv
 ```
 
-### Development Dependencies
-
-Install development tools:
-```bash
-uv sync --group dev  # Install dev dependencies
-uv run black .       # Format code
-uv run ruff check .  # Lint code
-uv run pytest       # Run tests
-```

@@ -14,10 +14,3 @@ dependencies = [
     "wordcloud==1.9.3",
 ]
 
-[dependency-groups]
-dev = [
-    "pytest",
-    "black", 
-    "ruff",
-    "httpx",  # For testing FastAPI endpoints
-]
