@@ -151,3 +151,49 @@ button:hover:not(:disabled) {
   height: 60px;
   border-width: 6px;
 }
+
+/* File Upload Zone */
+.file-upload-zone {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  background-color: #f9f9f9;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  margin-bottom: 1rem;
+}
+
+.file-upload-zone:hover {
+  border-color: #007bff;
+  background-color: #f0f8ff;
+}
+
+.file-upload-zone.drag-over {
+  border-color: #007bff;
+  background-color: #e6f3ff;
+  transform: scale(1.02);
+}
+
+.file-upload-label {
+  display: block;
+  font-size: 1.1rem;
+  color: #666;
+  cursor: pointer;
+}
+
+.file-types {
+  font-size: 0.9rem;
+  color: #999;
+  margin-top: 0.5rem;
+}
+
+.uploaded-file-info {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Header
+from fastapi import FastAPI, HTTPException, Header, File, UploadFile
 from pydantic import BaseModel
 from wordcloud import WordCloud
 import imageio.v2 as imageio
@@ -11,8 +11,73 @@ import google.generativeai as genai
 from google.api_core import exceptions as google_exceptions
 import numpy as np
 import re
+import csv
+from io import StringIO
+import chardet
 
 app = FastAPI()
+
+# --- Constants ---
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+ALLOWED_EXTENSIONS = {'.txt', '.csv', '.tsv', '.md', '.log'}
+ALLOWED_MIME_TYPES = {
+    'text/plain', 'text/csv', 'text/tab-separated-values', 
+    'text/markdown', 'application/csv', 'text/x-log'
+}
+
+
+# --- Helper Functions ---
+def detect_encoding(file_bytes: bytes) -> str:
+    """Detect text encoding of uploaded file."""
+    detected = chardet.detect(file_bytes)
+    return detected.get('encoding', 'utf-8') or 'utf-8'
+
+
+def extract_text_from_csv(content: str, filename: str) -> str:
+    """Extract meaningful text from CSV content."""
+    try:
+        # Try different delimiters based on file extension
+        delimiter = '\t' if filename.lower().endswith('.tsv') else ','
+        
+        # Parse CSV content
+        csv_reader = csv.reader(StringIO(content), delimiter=delimiter)
+        
+        # Extract all non-empty text values
+        text_parts = []
+        for row_num, row in enumerate(csv_reader):
+            if row_num > 1000:  # Limit rows for performance
+                break
+            for cell in row:
+                cell = cell.strip()
+                if cell and not cell.isdigit():  # Skip empty cells and pure numbers
+                    text_parts.append(cell)
+        
+        return ' '.join(text_parts)
+    except Exception:
+        # Fallback: treat as plain text
+        return content
+
+
+def validate_file_type(filename: str, content_type: str) -> bool:
+    """Validate file type by extension and MIME type."""
+    if not filename:
+        return False
+    
+    # Check file extension
+    file_ext = os.path.splitext(filename.lower())[1]
+    if file_ext not in ALLOWED_EXTENSIONS:
+        return False
+    
+    # For FastAPI file uploads, content_type might be 'application/octet-stream' or None
+    # So we primarily rely on file extension, with MIME type as secondary validation
+    if content_type and content_type not in ALLOWED_MIME_TYPES:
+        # Allow generic text types and common upload content types
+        if not (content_type.startswith('text/') or 
+                content_type == 'application/octet-stream' or
+                content_type == 'application/csv'):
+            return False
+    
+    return True
 
 
 # --- Models ---
@@ -51,6 +116,79 @@ async def generate(prompt: Prompt, x_gemini_api_key: str | None = Header(None)):
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"An unexpected error occurred: {str(e)}"
+        )
+
+
+class FileUploadResponse(BaseModel):
+    text: str
+    filename: str
+    file_size: int
+
+
+@app.post("/upload-file", response_model=FileUploadResponse)
+async def upload_file(file: UploadFile = File(...)):
+    """Upload a text file and extract its content for word cloud generation."""
+    
+    # Validate file size
+    if file.size and file.size > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=413,
+            detail=f"File too large. Maximum size is {MAX_FILE_SIZE // (1024*1024)}MB."
+        )
+    
+    # Validate file type
+    if not validate_file_type(file.filename or "", file.content_type or ""):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid file type. Allowed extensions: {', '.join(ALLOWED_EXTENSIONS)}"
+        )
+    
+    try:
+        # Read file content
+        file_bytes = await file.read()
+        
+        # Double-check file size after reading
+        if len(file_bytes) > MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=413,
+                detail=f"File too large. Maximum size is {MAX_FILE_SIZE // (1024*1024)}MB."
+            )
+        
+        # Detect encoding and decode content
+        encoding = detect_encoding(file_bytes)
+        try:
+            content = file_bytes.decode(encoding)
+        except UnicodeDecodeError:
+            # Fallback to utf-8 with error handling
+            content = file_bytes.decode('utf-8', errors='replace')
+        
+        # Extract text based on file type
+        filename = file.filename or ""
+        if filename.lower().endswith(('.csv', '.tsv')):
+            extracted_text = extract_text_from_csv(content, filename)
+        else:
+            # For plain text files, use content as-is
+            extracted_text = content.strip()
+        
+        if not extracted_text:
+            raise HTTPException(
+                status_code=400,
+                detail="No readable text content found in the uploaded file."
+            )
+        
+        return FileUploadResponse(
+            text=extracted_text,
+            filename=filename,
+            file_size=len(file_bytes)
+        )
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error processing file: {str(e)}"
         )
 
 

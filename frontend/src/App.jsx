@@ -14,6 +14,8 @@ function App() {
   const [generatedText, setGeneratedText] = useState(''); // Cache for the API response
   const [loading, setLoading] = useState(false)
   const [isRendering, setIsRendering] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState(null)
+  const [isDragOver, setIsDragOver] = useState(false)
 
   // Debounce the exclude words input
   useEffect(() => {
@@ -68,6 +70,62 @@ function App() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleFileUpload = async (file) => {
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      setLoading(true);
+      const res = await fetch('/upload-file', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || 'Failed to upload file');
+      }
+
+      const data = await res.json();
+      setText(data.text);
+      setUploadedFile({ name: data.filename, size: data.file_size });
+      alert(`File uploaded successfully! Extracted ${data.text.length} characters from ${data.filename}`);
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      handleFileUpload(files[0]);
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleFileInputChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileUpload(file);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -134,9 +192,34 @@ function App() {
         />
       </div>
       <form onSubmit={handleSubmit} className="generate-form">
+        <div 
+          className={`file-upload-zone ${isDragOver ? 'drag-over' : ''}`}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+        >
+          <input
+            type="file"
+            id="file-input"
+            accept=".txt,.csv,.tsv,.md,.log"
+            onChange={handleFileInputChange}
+            style={{ display: 'none' }}
+          />
+          <label htmlFor="file-input" className="file-upload-label">
+            📁 Drop a file here or click to browse
+            <div className="file-types">Supports: .txt, .csv, .tsv, .md, .log (max 10MB)</div>
+          </label>
+        </div>
+        
+        {uploadedFile && (
+          <div className="uploaded-file-info">
+            ✅ Uploaded: {uploadedFile.name} ({Math.round(uploadedFile.size / 1024)} KB)
+          </div>
+        )}
+
         <textarea
           rows="6"
-          placeholder="Enter text to analyze (e.g., a chapter from a book, an essay, etc.)"
+          placeholder="Enter text to analyze (e.g., a chapter from a book, an essay, etc.) or upload a file above"
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
