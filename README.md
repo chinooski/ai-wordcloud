@@ -25,7 +25,24 @@ npm install
 npm run build
 ```
 
-### 2. Set Up Backend Environment
+### 2. Install uv (Python Package Manager)
+**uv** is a fast, modern Python package manager that we use instead of pip for much better performance.
+
+**Install uv:**
+-   On **macOS / Linux**:
+    ```bash
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    ```
+-   On **Windows**:
+    ```powershell
+    powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+    ```
+-   **Alternative (via pip):**
+    ```bash
+    pip install uv
+    ```
+
+### 3. Set Up Backend Environment
 Navigate back to the project root and then into the `backend` directory.
 
 **Create the virtual environment:**
@@ -47,16 +64,44 @@ python3 -m venv .venv
 **Install Python packages:**
 *(Ensure your virtual environment is active before running)*
 ```bash
-pip install -r ../requirements.txt
+uv pip install -r ../requirements.txt
 ```
 
-### 3. Start the Server
+> **⚡ Performance Note:** uv is 10-100x faster than pip! Installation typically completes in under 1 second.
+
+<details>
+<summary>🔄 <strong>Migrating from pip?</strong> Click here for migration guide</summary>
+
+**If you were previously using pip:**
+
+1. **Remove old virtual environment** (optional but recommended):
+   ```bash
+   rm -rf .venv  # On macOS/Linux
+   rmdir /s .venv  # On Windows
+   ```
+
+2. **Create fresh environment and install with uv:**
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate  # macOS/Linux
+   # OR
+   .\.venv\Scripts\activate  # Windows
+   uv pip install -r ../requirements.txt
+   ```
+
+**Fallback to pip** (if needed):
+```bash
+pip install -r ../requirements.txt  # Still works as backup
+```
+</details>
+
+### 4. Start the Server
 From the `backend` directory (with your virtual environment activated), start the FastAPI server:
 ```bash
 uvicorn main:app --reload
 ```
 
-### 4. Use the App
+### 5. Use the App
 -   Navigate to `http://127.0.0.1:8000` in your browser.
 -   Enter your Google AI Studio (Gemini) API key in the designated input field. The key is sent with each request and is not stored on the server.
 -   Enter your source text and instructions, and click "Generate New Text."

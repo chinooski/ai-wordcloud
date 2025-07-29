@@ -39,9 +39,11 @@ npm run lint         # Run ESLint
 cd backend
 python3 -m venv .venv
 source .venv/bin/activate  # On Windows: .\.venv\Scripts\activate
-pip install -r ../requirements.txt
+uv pip install -r ../requirements.txt  # Fast Python package manager (10-100x faster than pip)
 uvicorn main:app --reload  # Start development server
 ```
+
+**Note:** We use `uv` instead of `pip` for much faster dependency installation. Install uv first: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 
 ### Production Deployment
 1. Build frontend: `cd frontend && npm run build`
