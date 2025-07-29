@@ -1,0 +1,16 @@
+[project]
+name = "ai-wordcloud"
+version = "0.1.0"
+description = "A simple, powerful web application for generating beautiful, customized word clouds from any text using Google's Gemini API."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi==0.111.0",
+    "google-generativeai==0.7.2",
+    "imageio==2.34.2",
+    "numpy==1.26.3",
+    "pillow==10.4.0",
+    "uvicorn==0.30.1",
+    "wordcloud==1.9.3",
+]
+
