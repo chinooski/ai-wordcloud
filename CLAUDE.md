@@ -64,3 +64,53 @@ uv remove package-name     # Remove dependency
 ## API Integration
 
 The app requires a Google AI Studio (Gemini) API key provided by users at runtime. The key is passed via `X-Gemini-API-Key` header and is not stored server-side.
+
+## Troubleshooting
+
+### Common uv Issues
+
+**Issue: `uv command not found`**
+```bash
+# Solution: Install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+# Restart terminal or source shell config
+```
+
+**Issue: `No solution found when resolving dependencies`**
+```bash
+# Solution: Clear cache and retry
+uv cache clean
+uv sync
+```
+
+**Issue: `Virtual environment activation issues`**
+```bash
+# Solution: Use uv run instead of manual activation
+uv run python backend/main.py
+# Or recreate virtual environment
+rm -rf .venv && uv sync
+```
+
+**Issue: `Module not found errors`**
+```bash
+# Solution: Ensure you're using uv run for script execution
+uv run uvicorn backend.main:app --reload
+# Or check if dependencies are installed
+uv sync --frozen
+```
+
+**Issue: `Permission denied` on Windows**
+```powershell
+# Solution: Run PowerShell as Administrator or use alternative install
+pip install uv
+```
+
+### Development Dependencies
+
+Install development tools:
+```bash
+uv sync --group dev  # Install dev dependencies
+uv run black .       # Format code
+uv run ruff check .  # Lint code
+uv run pytest       # Run tests
+```

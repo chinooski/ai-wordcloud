@@ -50,13 +50,13 @@ Navigate back to the project root.
 uv sync
 ```
 
-> **⚡ Performance Note:** uv is 10-100x faster than pip! Installation typically completes in under 1 second.
+> **⚡ Performance Note:** uv is typically 10-100x faster than pip for dependency resolution and installation, completing in under 1 second thanks to its Rust-based resolver and parallel downloads.
 
 **Alternative: Manual setup** (if you want to understand the process):
 ```bash
 # uv automatically creates and manages the virtual environment
 uv venv  # Creates .venv automatically
-uv pip install -e .  # Installs dependencies from pyproject.toml
+uv sync  # Installs dependencies from pyproject.toml
 ```
 
 <details>
